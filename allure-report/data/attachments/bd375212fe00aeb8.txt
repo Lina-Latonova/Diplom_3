@@ -1,0 +1,1 @@
+Элемент ('xpath', "(//div[@class='Modal_modal__container__Wo2l_'])[1]") успешно исчез.
