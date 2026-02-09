@@ -55,16 +55,13 @@ def main_page(driver):
 def login(main_page):
     main_page.go_to_site()
     main_page.click_personal_account()
-    
     login_page = LoginPage(main_page.driver)
     login_page.login("galina_aqa_tester@gmail.com", "galina1234")
-    
     main_page.click_constructor()
 
 
 @pytest.fixture(scope="function")
 def order_feed_page(driver):
-    
     page = OrderFeedPage(driver)
     page.go_to_site()
     return page

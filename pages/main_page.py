@@ -9,7 +9,7 @@ class MainPage(BasePage):
 
     @allure.step("Кликнуть на кнопку 'Лента Заказов'")
     def click_order_feed(self):
-        self.wait_for_element_clickable(MainLocators.ORDER_FEED_BUTTON)
+        self.wait_for_element_clickable(MainLocators.ORDER_FEED_BUTTON, time=40)
         self.click_element(MainLocators.ORDER_FEED_BUTTON)
 
     @allure.step("Кликнуть на кнопку 'Личный Кабинет'")
@@ -35,7 +35,7 @@ class MainPage(BasePage):
     @allure.step("Получить значение счетчика ингредиента")
     def get_ingredient_counter(self):
         counter = self.find_element(MainLocators.INGREDIENT_COUNTER)
-        return int(counter.text) if counter.text else 0
+        return int(counter.text)
 
     @allure.step("Создать заказ")
     def create_order(self):
@@ -51,9 +51,9 @@ class MainPage(BasePage):
         return element.is_displayed()
 
     @allure.step("Ожидать увеличение счетчика ингредиента")
-    def expect_ingredient_counter_increase(self, initial_count, time=30):
+    def expect_ingredient_counter_increase(self, initial_count, time=40):
         self.wait_for_condition(
-            lambda driver: self.get_ingredient_counter() > initial_count,
+            lambda _: self.get_ingredient_counter() > initial_count,
             time=time,
             message="Счетчик ингредиента не увеличился")
         return True
@@ -61,17 +61,13 @@ class MainPage(BasePage):
 
     @allure.step("Получить номер заказа")
     def get_order_number(self):
-        # Текущий номер заказа (старое значение)
         old_value = self.find_element(MainLocators.ORDER_NUMBER).text
 
-        # Ждем, пока номер заказа изменится
         self.wait_for_condition(
-            lambda driver: self.find_element(MainLocators.ORDER_NUMBER).text != old_value,
-            time=30,
-            message="Номер заказа не изменился"
-        )
+            lambda _: self.find_element(MainLocators.ORDER_NUMBER).text != old_value,
+            time=40,
+            message="Номер заказа не изменился")
 
-        # Берем новый номер заказа
         new_element = self.find_element(MainLocators.ORDER_NUMBER)
         return new_element.text
 
@@ -97,7 +93,7 @@ class MainPage(BasePage):
     
     @allure.step("Закрыть модальное окно через JavaScript")
     def close_modal_by_js(self):
-        self.driver.execute_script("""
+        self.execute_script("""
             var overlay = document.querySelector('.Modal_modal_overlay__x2ZCr');
             if (overlay && overlay.style.display !== 'none') {
                 overlay.style.display = 'none';

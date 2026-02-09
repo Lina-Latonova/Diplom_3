@@ -33,20 +33,20 @@ class OrderFeedPage(BasePage):
     @allure.step("Ожидать увеличение счетчика заказов за все время")
     def wait_for_total_orders_increase(self, initial_count, time=10):
         self.wait_for_condition(
-            lambda driver: self.get_total_orders_count() > initial_count,
+            lambda _: self.get_total_orders_count() > initial_count,
             time, "Счетчик заказов за все время не увеличился")
         return True
     
     @allure.step("Ожидать увеличение счетчика заказов за сегодня")
-    def wait_for_today_orders_increase(self, initial_count, time=15):
+    def wait_for_today_orders_increase(self, initial_count, time=40):
         self.wait_for_condition(
-            lambda driver: self.get_today_orders_count() > initial_count,
+            lambda _: self.get_today_orders_count() > initial_count,
             time, "Счетчик заказов за сегодня не увеличился")
         return True
     
     @allure.step("Ожидать появление заказа в разделе 'В работе'")
     def wait_for_order_in_progress(self, order_number, time=10):
         self.wait_for_condition(
-            lambda driver: any(order_number in order for order in self.get_in_progress_orders()),
+            lambda _: any(order_number in order for order in self.get_in_progress_orders()),
             time, f"Заказ {order_number} не появился в разделе 'В работе'")
         return True

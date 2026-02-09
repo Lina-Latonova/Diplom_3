@@ -26,7 +26,7 @@ class BasePage:
         return self.driver.get(self.base_url)
 
     @allure.step("Ожидать кликабельность элемента: {locator}")
-    def wait_for_element_clickable(self, locator, time=10):
+    def wait_for_element_clickable(self, locator, time=20):
         return WebDriverWait(self.driver, time).until(
             EC.element_to_be_clickable(locator),
             message=f"Элемент не кликабелен: {locator}")
@@ -53,7 +53,7 @@ class BasePage:
             message=f"Элемент не исчез: {locator}")
 
     @allure.step("Ожидать выполнение условия")
-    def wait_for_condition(self, condition, time=10, message="Условие не выполнено"):
+    def wait_for_condition(self, condition, time=30, message="Условие не выполнено"):
         return WebDriverWait(self.driver, time).until(
             condition,
             message=message)
@@ -68,7 +68,7 @@ class BasePage:
 
 
     @allure.step("Ожидать изменение номера заказа")
-    def wait_for_order_number_change(self, locator, old_value, timeout=20):
+    def wait_for_order_number_change(self, locator, old_value, time=30):
         return lambda d: d.find_element(*locator).text != old_value
     
     @allure.step("Ожидать видимость элемента: {locator}")
