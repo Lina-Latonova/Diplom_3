@@ -1,0 +1,1 @@
+Элемент ('xpath', "//div[@class='Modal_modal_overlay__x2ZCr']") успешно исчез.
