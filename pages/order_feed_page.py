@@ -1,8 +1,6 @@
-from .base_page import BasePage
 import allure
+from .base_page import BasePage
 from locators.order_feed_locators import OrderFeedLocators
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
 
 class OrderFeedPage(BasePage):
 
@@ -29,37 +27,26 @@ class OrderFeedPage(BasePage):
     
     @allure.step("Проверить видимость счетчика заказов за все время")
     def is_total_orders_counter_visible(self):
-        try:
-            self.wait_for_element_visible(OrderFeedLocators.TOTAL_ORDERS_COUNT, 5)
-            return True
-        except:
-            return False
-        
+        self.wait_for_element_visible(OrderFeedLocators.TOTAL_ORDERS_COUNT, 5)
+        return True
+    
     @allure.step("Ожидать увеличение счетчика заказов за все время")
     def wait_for_total_orders_increase(self, initial_count, time=10):
-        try:
-            self.wait_for_condition(
-                lambda driver: self.get_total_orders_count() > initial_count,
-                time,
-                "Счетчик заказов за все время не увеличился"
-            )
-            return True
-        except:
-            return False
-        
+        self.wait_for_condition(
+            lambda driver: self.get_total_orders_count() > initial_count,
+            time, "Счетчик заказов за все время не увеличился")
+        return True
+    
     @allure.step("Ожидать увеличение счетчика заказов за сегодня")
     def wait_for_today_orders_increase(self, initial_count, time=15):
-        WebDriverWait(self.driver, time).until(
-        lambda driver: self.get_total_orders_count() > initial_count
-        )
+        self.wait_for_condition(
+            lambda driver: self.get_today_orders_count() > initial_count,
+            time, "Счетчик заказов за сегодня не увеличился")
         return True
-
+    
     @allure.step("Ожидать появление заказа в разделе 'В работе'")
     def wait_for_order_in_progress(self, order_number, time=10):
-        try:
-            self.wait_for_condition(
-                lambda driver: any(order_number in order for order in self.get_in_progress_orders()),
-                time, f"Заказ {order_number} не появился в разделе 'В работе'")
-            return True
-        except TimeoutException:
-            return False
+        self.wait_for_condition(
+            lambda driver: any(order_number in order for order in self.get_in_progress_orders()),
+            time, f"Заказ {order_number} не появился в разделе 'В работе'")
+        return True

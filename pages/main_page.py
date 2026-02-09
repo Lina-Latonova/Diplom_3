@@ -1,9 +1,6 @@
-from .base_page import BasePage
 import allure
+from .base_page import BasePage
 from locators.main_locators import MainLocators
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support import expected_conditions as EC
 
 class MainPage(BasePage):
     @allure.step("Кликнуть на кнопку 'Конструктор'")
@@ -12,9 +9,7 @@ class MainPage(BasePage):
 
     @allure.step("Кликнуть на кнопку 'Лента Заказов'")
     def click_order_feed(self):
-        WebDriverWait(self.driver, 20).until(
-        EC.element_to_be_clickable(MainLocators.ORDER_FEED_BUTTON)
-        )
+        self.wait_for_element_clickable(MainLocators.ORDER_FEED_BUTTON)
         self.click_element(MainLocators.ORDER_FEED_BUTTON)
 
     @allure.step("Кликнуть на кнопку 'Личный Кабинет'")
@@ -37,28 +32,6 @@ class MainPage(BasePage):
     def click_ingredient(self):
         self.click_element(MainLocators.BUN_INGREDIENT)
 
-    @allure.step("Закрыть модальное окно")
-    def close_modal(self):
-        WebDriverWait(self.driver, 20).until(
-            EC.element_to_be_clickable(MainLocators.MODAL_CLOSE_BUTTON)
-        )
-    
-        modal_close_button = self.driver.find_element(*MainLocators.MODAL_CLOSE_BUTTON)
-        self.driver.execute_script("arguments[0].click();", modal_close_button)
-
-        WebDriverWait(self.driver, 30).until(
-            EC.invisibility_of_element_located(MainLocators.MODAL_OVERLAY)
-        )   
-
-        WebDriverWait(self.driver, 40).until(
-            EC.invisibility_of_element_located((MainLocators.MODAL_OVERLAY))
-        )
-    
-    @allure.step("Проверить видимость модального окна")
-    def check_modal_is_visible(self):
-        element = self.find_element(MainLocators.INGREDIENT_DETAILS_MODAL)
-        return element.is_displayed()
-    
     @allure.step("Получить значение счетчика ингредиента")
     def get_ingredient_counter(self):
         counter = self.find_element(MainLocators.INGREDIENT_COUNTER)
@@ -72,42 +45,61 @@ class MainPage(BasePage):
     def check_order_creation(self):
         self.wait_for_element_visible(MainLocators.ORDER_MODAL, 15)
 
-    @allure.step("Получить номер заказа")
-    def get_order_number(self):
-        element = WebDriverWait(self.driver, 30).until(
-        EC.visibility_of_element_located(MainLocators.ORDER_NUMBER)
-    )
-
-        WebDriverWait(self.driver, 20).until(
-        self.wait_for_order_number_change(MainLocators.ORDER_NUMBER, "9999")
-    )
-
-        return element.text
-
     @allure.step("Проверить видимость кнопки оформления заказа")
     def check_order_button_is_visible(self):
         element = self.find_element(MainLocators.ORDER_BUTTON)
         return element.is_displayed()
 
-    @allure.step("Ожидать видимость модального окна")
-    def wait_for_modal_visible(self):
-        self.click_element(MainLocators.MODAL_CLOSE_BUTTON)
-        WebDriverWait(self.driver, 10).until(
-            EC.invisibility_of_element_located(MainLocators.INGREDIENT_DETAILS_MODAL)
+    @allure.step("Ожидать увеличение счетчика ингредиента")
+    def expect_ingredient_counter_increase(self, initial_count, time=30):
+        self.wait_for_condition(
+            lambda driver: self.get_ingredient_counter() > initial_count,
+            time=time,
+            message="Счетчик ингредиента не увеличился")
+        return True
+    
+
+    @allure.step("Получить номер заказа")
+    def get_order_number(self):
+        # Текущий номер заказа (старое значение)
+        old_value = self.find_element(MainLocators.ORDER_NUMBER).text
+
+        # Ждем, пока номер заказа изменится
+        self.wait_for_condition(
+            lambda driver: self.find_element(MainLocators.ORDER_NUMBER).text != old_value,
+            time=30,
+            message="Номер заказа не изменился"
         )
 
+        # Берем новый номер заказа
+        new_element = self.find_element(MainLocators.ORDER_NUMBER)
+        return new_element.text
+
+
+    @allure.step("Закрыть модальное окно")
+    def close_modal(self):
+        self.wait_for_element_clickable(MainLocators.MODAL_CLOSE_BUTTON)
+        modal_close_button = self.find_element(MainLocators.MODAL_CLOSE_BUTTON)
+        self.execute_script("arguments[0].click();", modal_close_button)
+        self.wait_for_element_invisible(MainLocators.MODAL_OVERLAY)
+
+    @allure.step("Проверить видимость модального окна")
+    def check_modal_is_visible(self):
+        element = self.find_element(MainLocators.INGREDIENT_DETAILS_MODAL)
+        return element.is_displayed()
+    
     @allure.step("Ожидать исчезновение модального окна")
     def wait_for_modal_invisible(self, time=5):
         self.wait_for_element_invisible(MainLocators.INGREDIENT_DETAILS_MODAL, time)
-        allure.attach(body=f"Элемент {MainLocators.INGREDIENT_DETAILS_MODAL} успешно исчез.", name="wait_for_modal_invisible_success", attachment_type=allure.attachment_type.TEXT)
+        allure.attach(body=f"Элемент {MainLocators.INGREDIENT_DETAILS_MODAL} успешно исчез.",
+                      name="wait_for_modal_invisible_success", attachment_type=allure.attachment_type.TEXT)
         return True
     
-    @allure.step("Ожидать увеличение счетчика ингредиента")
-    def expect_ingredient_counter_increase(self, initial_count, time=10):
-        try: # Здесь нужен try-except !!! (Нельзя просто 'assert', он не работает)
-            WebDriverWait(self.driver, time).until(
-            lambda driver: self.get_ingredient_counter() > initial_count
-        )
-            return True
-        except TimeoutException:
-            return False
+    @allure.step("Закрыть модальное окно через JavaScript")
+    def close_modal_by_js(self):
+        self.driver.execute_script("""
+            var overlay = document.querySelector('.Modal_modal_overlay__x2ZCr');
+            if (overlay && overlay.style.display !== 'none') {
+                overlay.style.display = 'none';
+            }
+        """)

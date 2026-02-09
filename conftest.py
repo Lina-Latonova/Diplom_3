@@ -8,16 +8,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from pages.login_page import LoginPage
 from pages.main_page import MainPage
 from pages.order_feed_page import OrderFeedPage
-import sys
-import os
-
-# Получаем абсолютный путь к корневой директории проекта
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Добавляем корневую директорию в sys.path, если ее там еще нет
-if ROOT_DIR not in sys.path:
-    sys.path.insert(0, ROOT_DIR)
-print (f"Путь до корневой директории: {ROOT_DIR}")
 
 def pytest_addoption(parser):
     parser.addoption("--browser", action="store", default="chrome", 

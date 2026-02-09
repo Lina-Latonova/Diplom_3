@@ -18,6 +18,7 @@ class TestOrderFeed:
         main_page.get_order_number()
        
         main_page.close_modal()
+        main_page.wait_for_modal_invisible(time=10)
         main_page.click_order_feed()
 
         assert order_feed_page.wait_for_total_orders_increase(initial_total)
@@ -37,6 +38,7 @@ class TestOrderFeed:
         main_page.get_order_number()
 
         main_page.close_modal()
+        main_page.wait_for_modal_invisible(time=10)
         main_page.click_order_feed()
       
         assert order_feed_page.wait_for_today_orders_increase(initial_today)
@@ -52,6 +54,7 @@ class TestOrderFeed:
         order_number = main_page.get_order_number()
               
         main_page.close_modal()
+        main_page.wait_for_modal_invisible(time=10)
         main_page.click_order_feed()
         
         assert order_feed_page.wait_for_order_in_progress(order_number)
